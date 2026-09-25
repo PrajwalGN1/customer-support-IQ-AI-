@@ -174,7 +174,7 @@ if should_ask:
                         else:
                             st.dataframe(pd.DataFrame(list(raw_result.items()), columns=["Group", "Count"]), use_container_width=True)
 
-                with st.expander("🔍 Inspect Query Plan & Execution Metadata"):
+                with st.expander(" Inspect Query Plan & Execution Metadata"):
                     st.json({
                         "question": query_to_run,
                         "query_plan": plan.model_dump(),
