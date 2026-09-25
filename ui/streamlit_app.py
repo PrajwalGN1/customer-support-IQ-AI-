@@ -118,31 +118,45 @@ sample_queries = [
     "What is the company's annual revenue?",
 ]
 
+# Initialize session state for query text
+if "query_input_text" not in st.session_state:
+    st.session_state["query_input_text"] = sample_queries[0]
+
+def select_sample_query(query_text: str):
+    st.session_state["query_input_text"] = query_text
+    st.session_state["trigger_ask"] = True
+
 # Quick selection buttons
 chip_cols = st.columns(3)
-selected_chip = None
 for i, sq in enumerate(sample_queries):
     col = chip_cols[i % 3]
-    if col.button(f"👉 {sq}", key=f"sq_{i}", use_container_width=True):
-        selected_chip = sq
+    col.button(
+        f"👉 {sq}",
+        key=f"sq_btn_{i}",
+        use_container_width=True,
+        on_click=select_sample_query,
+        args=(sq,),
+    )
 
 user_query = st.text_input(
     "Enter your question about tickets:",
-    value=selected_chip if selected_chip else "Which agent has the lowest average customer rating?",
+    key="query_input_text",
     placeholder="e.g. How many open high priority tickets do we have?",
 )
 
 ask_btn = st.button("🚀 Ask AI", type="primary")
+should_ask = ask_btn or st.session_state.pop("trigger_ask", False)
 
-if ask_btn or selected_chip:
-    if not user_query.strip():
+if should_ask:
+    query_to_run = user_query.strip()
+    if not query_to_run:
         st.warning("Please enter a valid question.")
     else:
         with st.spinner("Processing natural language query..."):
             try:
                 with time_execution() as timer:
                     planner = get_llm_provider()
-                    plan = planner.generate_plan(user_query)
+                    plan = planner.generate_plan(query_to_run)
                     raw_result, meta, answer = query_engine.execute_plan(plan)
 
                 # Display Answer
@@ -162,7 +176,7 @@ if ask_btn or selected_chip:
 
                 with st.expander("🔍 Inspect Query Plan & Execution Metadata"):
                     st.json({
-                        "question": user_query,
+                        "question": query_to_run,
                         "query_plan": plan.model_dump(),
                         "execution_metadata": {
                             "execution_time_ms": timer["elapsed_ms"],
