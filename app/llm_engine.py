@@ -54,7 +54,8 @@ STRICT RULES:
 4. If asked "Which agent has lowest rating", use operation: "group_average", column: "customer_rating", group_by: "agent_id", sort_order: "asc", limit: 1.
 5. If asked "Which agent resolved the most tickets", filter by status "Resolved", operation: "group_count", group_by: "agent_id", sort_order: "desc", limit: 1.
 6. For "unresolved" tickets, use filters: {"status": ["Open", "Escalated"]}.
-7. Return ONLY valid JSON matching the schema. No markdown formatting outside JSON.
+7. If asked about "anomalies" or "longest resolution times", use operation: "list", sort_by: "resolution_time_hrs", sort_order: "desc", limit: 10.
+8. Return ONLY valid JSON matching the schema. No markdown formatting outside JSON.
 
 JSON Schema to return:
 {

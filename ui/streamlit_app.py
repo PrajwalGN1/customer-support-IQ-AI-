@@ -115,7 +115,7 @@ sample_queries = [
     "Which agent resolved the most tickets?",
     "What is the average customer rating for Technical tickets?",
     "Show all Critical tickets not resolved within 12 hours.",
-    "What is the company's annual revenue?",
+    "Are there any anomalies in resolution times?",
 ]
 
 # Initialize session state for query text
@@ -137,6 +137,11 @@ for i, sq in enumerate(sample_queries):
         on_click=select_sample_query,
         args=(sq,),
     )
+
+# Dedicated Guardrail Test Button
+st.caption("🛡️ **Security & Safety Guardrail Test** (Verify out-of-domain rejection without hallucination):")
+if st.button("🧪 Test Out-of-Domain Guardrail: 'What is the company\'s annual revenue?'", key="guardrail_test_btn"):
+    select_sample_query("What is the company's annual revenue?")
 
 user_query = st.text_input(
     "Enter your question about tickets:",
@@ -161,7 +166,8 @@ if should_ask:
 
                 # Display Answer
                 if not plan.is_supported:
-                    st.warning(f"⚠️ {answer}")
+                    st.info(f"🛡️ **Security Guardrail Active**: {answer}")
+                    st.caption("ℹ️ *Notice: Company revenue is not in the support ticket schema. The query planner safely refused to answer to prevent hallucinations.*")
                 else:
                     st.success(f"**Answer:** {answer}")
 
