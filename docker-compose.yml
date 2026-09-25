@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: supportiq-api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - LOG_LEVEL=INFO
+      - DATA_PATH=data/support_tickets.csv
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-120b}
+      - LLM_PROVIDER=${LLM_PROVIDER:-groq}
+      - REFERENCE_TIME_MODE=dataset_max
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  ui:
+    build: .
+    container_name: supportiq-ui
+    command: streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - APP_ENV=production
+      - LOG_LEVEL=INFO
+      - DATA_PATH=data/support_tickets.csv
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-120b}
+      - LLM_PROVIDER=${LLM_PROVIDER:-groq}
+      - REFERENCE_TIME_MODE=dataset_max
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - api
+    restart: unless-stopped
